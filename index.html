@@ -1,0 +1,42 @@
+<script> {
+  async function fetch(url) {
+    const res = await window.fetch(url);
+    const json = await res.json();
+    return json;
+  }
+
+  function getPositionByVersion(versions, version) {
+    const {major, minor} = version;
+    for (const v in versions) {
+      if (minor && v === minor) return versions[v];
+      if (major && v.startsWith(major + ".")) return versions[v];
+    }
+    throw 'NOT FOUND: ' + JSON.stringify(version);
+  }
+
+  function getUrlByItems(json, platform, position) {
+    for (let i = 0; i < json.items.length; i++) {
+      const item = json.items[i];
+      if (item.name === `${platform}/${position}/chrome-${platform.toLowerCase()}.zip`) {
+        return item.mediaLink;
+      }
+    }
+    throw 'NOT FOUND: ' + JSON.stringify({platform, position});
+  }
+
+  async function main(version, platform = 'Mac') {
+    debugger;
+    const versions = await fetch('./versions.json');
+    const position = getPositionByVersion(versions, version);
+    const url = await fetch(`https://www.googleapis.com/storage/v1/b/chromium-browser-snapshots/o?delimiter=/&prefix=${platform}/${position}/&fields=items(kind,mediaLink,metadata,name,size,updated),kind,prefixes,nextPageToken`);
+    open(url);
+  }
+
+  main(
+    {
+      minor: prompt('Minor Version? such as "88.1.2.3" (optional)'),
+      major: prompt('Major Version? such as "88" (optional)')
+    },
+    prompt('Platform? such as "Mac"')
+  );
+} </script>
