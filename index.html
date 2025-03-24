@@ -29,7 +29,7 @@
     const versions = await fetch('./versions.json');
     const position = getPositionByVersion(versions, version);
     const items = await fetch(`https://www.googleapis.com/storage/v1/b/chromium-browser-snapshots/o?delimiter=/&prefix=${platform}/${position}/&fields=items(kind,mediaLink,metadata,name,size,updated),kind,prefixes,nextPageToken`);
-    const url = getUrlByItems(items);
+    const url = getUrlByItems(items, platform, position);
     open(url);
   }
 
